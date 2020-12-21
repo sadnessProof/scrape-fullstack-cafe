@@ -130,6 +130,22 @@ def scrape_question(browser, q, is_challenge, a_json, q_json):
     q.find_element_by_xpath('./div/div/div[1]/span').click()
 
 
+# Function to remove spaces  
+# and convert into camel case 
+def convert(s): 
+    if(len(s) == 0): 
+        return
+    s1 = '' 
+    s1 += s[0].upper() 
+    for i in range(1, len(s)): 
+        if (s[i] == ' '): 
+            s1 += s[i + 1].upper() 
+            i += 1
+        elif(s[i - 1] != ' '): 
+            s1 += s[i]  
+    return s1
+
+
 def scrape_section(browser, section_name, topic_links):
     section_name = str(section_name).strip()
     section_folder = data_folder+'/'+section_name
@@ -155,11 +171,13 @@ def scrape_section(browser, section_name, topic_links):
             wait_by_css_selector(browser, question_css_selector)
             if len(question.find_elements_by_css_selector(question_css_selector)):
                 scrape_question(browser, question, is_challenge==2, answers_json, questions_json)
-            
-        with open(f'{section_folder}/{topic_name}-answers.json', 'w') as outfile:
+        
+        topic_name = convert(topic_name.replace('-',' '))
+
+        with open(f'{section_folder}/{topic_name}Answers.json', 'w') as outfile:
             json.dump(answers_json, outfile)
         
-        with open(f'{section_folder}/{topic_name}-questions.json', 'w') as outfile:
+        with open(f'{section_folder}/{topic_name}Questions.json', 'w') as outfile:
             json.dump(questions_json, outfile)
 
 
@@ -196,3 +214,6 @@ question_tag_css_selector = 'div.col.justify-content-center.align-self-center.my
 question_enumeration = 1
 data_folder = './Data'
 main()
+
+# mccallisterkevin95@gmail.com
+# QoolKevin!245
