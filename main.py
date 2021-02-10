@@ -1,3 +1,6 @@
+# will be properly commented soon ;)
+
+
 import os
 import time
 import json
@@ -10,7 +13,7 @@ from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.support import expected_conditions as EC
 
 
-# necessary variables
+
 data_folder = './Data'
 topics_xpath = '//*[@id="root"]/div/div[5]/div[2]/div/div/div/div'
 sections_xpath = '//*[@id="root"]/div/div[5]/div[2]/div/div/nav[1]/div/div/div/button'
@@ -204,16 +207,4 @@ def main():
     browser.quit()
 
 
-# necessary variables
-topics_xpath = '//*[@id="root"]/div/div[5]/div[2]/div/div/div/div'
-sections_xpath = '//*[@id="root"]/div/div[5]/div[2]/div/div/nav[1]/div/div/div/button'
-topic_css_selector = 'div.p-2.topic-questions-spacer'
-question_css_selector = 'div.my-1.px-2.py-2.rounded.hovered'
-answer_tag_css_selector = 'div.d-block.px-2'
-question_tag_css_selector = 'div.col.justify-content-center.align-self-center.my-auto'
-question_enumeration = 1
-data_folder = './Data'
 main()
-
-# mccallisterkevin95@gmail.com
-# QoolKevin!245
