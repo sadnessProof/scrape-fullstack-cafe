@@ -1,6 +1,4 @@
-# will be properly commented soon ;)
-
-
+# imports
 import os
 import time
 import json
@@ -13,19 +11,21 @@ from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.support import expected_conditions as EC
 
 
-
-data_folder = './Data'
-topics_xpath = '//*[@id="root"]/div/div[5]/div[2]/div/div/div/div'
-sections_xpath = '//*[@id="root"]/div/div[5]/div[2]/div/div/nav[1]/div/div/div/button'
-topic_css_selector = 'div.p-2.topic-questions-spacer'
-question_css_selector = 'div.my-1.px-2.py-2.rounded.hovered'
-answer_tag_css_selector = 'div.d-block.px-2'
-question_tag_css_selector = 'div.col.justify-content-center.align-self-center.my-auto'
+# constants
+FULL_STACK_CAFFEE_LINK = 'https://www.fullstack.cafe/'
+DATA_FOLDER = './Data'
+TOPIC_XPATH = '//*[@id="root"]/div/div[5]/div[2]/div/div/div/div'
+SECTION_XPATH = '//*[@id="root"]/div/div[5]/div[2]/div/div/nav[1]/div/div/div/button'
+TOPIC_CSS_SELECTOR = 'div.p-2.topic-questions-spacer'
+QUESTION_CSS_SELECTOR = 'div.my-1.px-2.py-2.rounded.hovered'
+ANSWER_TAG_CSS_SELECTOR = 'div.d-block.px-2'
 
 
 def wait_by_xpath(browser, xpath):
     """
-    this method is waiting for xpath to load
+    waits until a node, xpath points to, is loaded.
+    if waiting time exceeds 30 seconds, then prints:
+    "failed to load a node with this {xpath}"
     :param browser:
     :param xpath:
     :return:
@@ -33,26 +33,42 @@ def wait_by_xpath(browser, xpath):
     try:
         WebDriverWait(browser, 30).until(EC.presence_of_element_located((By.XPATH, xpath)))
     except TimeoutException:
-        print('failed wait_xpath')
+        print(f'failed to load a node with this {xpath}')
 
 
 def wait_by_css_selector(browser, css_selector):
+    """
+    waits until at least one node, css_selector points to, is loaded.
+    if waiting time exceeds 30 seconds, then prints:
+    "failed to load a node with this {css_selector}"
+    :param browser:
+    :param css_selector:
+    :return:
+    """
     try:
         WebDriverWait(browser, 30).until(EC.presence_of_element_located((By.CSS_SELECTOR, css_selector)))
     except TimeoutException:
-        print('failed wait_css_selector')
+        print(f'failed to load a node with this {css_selector}')
 
 
 def wait_by_class_name(browser, class_name):
+    """
+    waits until at least one node, class_name points to, is loaded.
+    if waiting time exceeds 30 seconds, then prints:
+    "failed to load a node with this {class_name}"
+    :param browser:
+    :param css_selector:
+    :return:
+    """
     try:
         WebDriverWait(browser, 30).until(EC.presence_of_element_located((By.CLASS_NAME, class_name)))
     except TimeoutException:
-        print('failed wait_class_name')
+        print(f'failed to load a node with this {class_name}')
 
 
 def clear_directory(directory_address):
     """
-    this method cleans passed directory
+    cleans directory on passed address
     :param directory_address:
     :return:
     """
@@ -68,6 +84,12 @@ def clear_directory(directory_address):
 
 
 def setup_environment(dest_path):
+    """
+    cleans the directory if it exists on the passed address.
+    if not creates new one.
+    :param directory_address:
+    :return:
+    """
     if not os.path.exists(dest_path):
         os.mkdir(dest_path)
     else:
@@ -75,26 +97,48 @@ def setup_environment(dest_path):
 
 
 def login():
+    """
+    opens google dialog to verify you identity.
+    since the site we are scrapint uses google authentication,
+    we have to log into the site manually, because
+    automating log in via google authentication is quite a big headache.
+    :param directory_address:
+    :return:
+    """
     browser = webdriver.Edge(os.getcwd() + '\\' + 'msedgedriver.exe')
     
     # get to the fullctack.cafe's home page
-    browser.get('https://www.fullstack.cafe/')
+    browser.get(FULL_STACK_CAFFEE_LINK)
     time.sleep(40) # 40 secs to log in
     return browser
 
 
 def section_topic_links(browser):
+    """
+    if section links are loaded on the site, this method
+    extracts all the topic links and returns as a list.
+    this way is much easier and faster for me.
+    :param directory_address:
+    :return topic_links:
+    """
     topic_links = []
-    wait_by_xpath(browser, topics_xpath)
-    for topic in browser.find_elements_by_xpath(topics_xpath):
+    wait_by_xpath(browser, TOPIC_XPATH)
+    for topic in browser.find_elements_by_xpath(TOPIC_XPATH):
         topic_links.append(topic.find_element_by_xpath('./a[1]').get_attribute('href'))
     
     return topic_links
 
         
 def get_section_elements(browser):
-    wait_by_xpath(browser, sections_xpath)
-    return browser.find_elements_by_xpath(sections_xpath)
+    """
+    I was needed to find an element by xpath planty of times.
+    I created a new method that contains not only the wait part,
+    but an extraction part as well.
+    :param directory_address:
+    :return:
+    """
+    wait_by_xpath(browser, SECTION_XPATH)
+    return browser.find_elements_by_xpath(SECTION_XPATH)
 
 
 def scrape_question(browser, q, is_challenge, a_json, q_json):
@@ -120,8 +164,8 @@ def scrape_question(browser, q, is_challenge, a_json, q_json):
         'isChallenge': is_challenge
     })
 
-    wait_by_css_selector(browser,answer_tag_css_selector)
-    a_content = browser.find_element_by_css_selector(answer_tag_css_selector).get_attribute('innerHTML')
+    wait_by_css_selector(browser,ANSWER_TAG_CSS_SELECTOR)
+    a_content = browser.find_element_by_css_selector(ANSWER_TAG_CSS_SELECTOR).get_attribute('innerHTML')
 
     a_json.append({
         'id': question_enumeration,
@@ -151,7 +195,7 @@ def convert(s):
 
 def scrape_section(browser, section_name, topic_links):
     section_name = str(section_name).strip()
-    section_folder = data_folder+'/'+section_name
+    section_folder = DATA_FOLDER+'/'+section_name
     os.mkdir(section_folder)
     # get all of the question for each topic
     for link in topic_links:
@@ -161,8 +205,8 @@ def scrape_section(browser, section_name, topic_links):
         answers_json = []
         questions_json = []
 
-        wait_by_css_selector(browser, topic_css_selector)
-        topic_questions = browser.find_element_by_css_selector(topic_css_selector).find_elements_by_xpath('./div')
+        wait_by_css_selector(browser, TOPIC_CSS_SELECTOR)
+        topic_questions = browser.find_element_by_css_selector(TOPIC_CSS_SELECTOR).find_elements_by_xpath('./div')
         
         is_challenge = 0
         for question in topic_questions:
@@ -171,8 +215,8 @@ def scrape_section(browser, section_name, topic_links):
                 is_challenge += 1
                 pass
 
-            wait_by_css_selector(browser, question_css_selector)
-            if len(question.find_elements_by_css_selector(question_css_selector)):
+            wait_by_css_selector(browser, QUESTION_CSS_SELECTOR)
+            if len(question.find_elements_by_css_selector(QUESTION_CSS_SELECTOR)):
                 scrape_question(browser, question, is_challenge==2, answers_json, questions_json)
         
         topic_name = convert(topic_name.replace('-',' '))
@@ -199,12 +243,12 @@ def scrape_the_site(browser):
         
     
 def main():
-    setup_environment(data_folder)
+    setup_environment(DATA_FOLDER)
     # get to the fullctack.cafe's home page
     browser = login()
-    browser.get('https://www.fullstack.cafe/')
+    browser.get(FULL_STACK_CAFFEE_LINK)
     scrape_the_site(browser)
     browser.quit()
 
-
+question_enumeration = 0
 main()
